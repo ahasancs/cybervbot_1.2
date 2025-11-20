@@ -12,7 +12,7 @@ integrating flow-based ML ransomware detection, SDN-driven quarantine, and a SOC
 - sdn/ryu_app.py: Ryu controller PoC for blocking IPs via OpenFlow
 - dashboards/: simple static HTML mockups for SOC UI
 - docs/architecture.mmd: Mermaid diagram
-- LICENSE: MIT
+- LICENSE: cybervbot by Md Abdullah Al Ahasan
 - CONTRIBUTING.md: how to run the PoC locally
 
 ## Quickstart (local PoC)
