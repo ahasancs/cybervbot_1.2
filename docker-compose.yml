@@ -1,0 +1,45 @@
+version: '3.7'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    depends_on: [zookeeper]
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports: ['29092:29092']
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.4.0
+    depends_on: [kafka]
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'PLAINTEXT://kafka:29092'
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    ports: ['8081:8081']
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+    environment:
+      - discovery.type=single-node
+    ports: ['9200:9200']
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.0
+    depends_on: [elasticsearch]
+    ports: ['5601:5601']
+  model-scoring:
+    build: ./services/model-scoring
+    ports:
+      - '8000:8000'
+    volumes:
+      - ./onnx_models:/app/models
+    depends_on: [kafka]
+  collector:
+    image: python:3.10-slim
+    working_dir: /app
+    volumes:
+      - ./services/collector:/app
+    command: ['python','producer.py']
+    depends_on: [kafka]
